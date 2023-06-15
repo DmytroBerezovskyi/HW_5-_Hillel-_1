@@ -1,0 +1,12 @@
+[flake8]
+exclude =
+    # No need to traverse our git directory
+    .git,
+    # There's no value in checking cache directories
+    __pycache__,
+    # No need to traverse our migration
+    migrations,
+    # No need to traverse our virtual environments
+    venv
+
+max-line-length=120
