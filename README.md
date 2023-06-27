@@ -45,3 +45,35 @@
 #Создать файл фикстур используя менеджмент команду dumpdata (https://docs.djangoproject.com/en/4.1/ref/django-admin/#dumpdata)
 #https://docs.djangoproject.com/en/4.1/ref/django-admin/#what-s-a-fixture
 #https://coderwall.com/p/mvsoyg/django-dumpdata-and-loaddata (секция Restore fresh database)
+
+
+#ДЗ 8. OneToOneField, ForeignKey, ManyToManyField
+
+#Реализовать в приложении (catalog созданной в одном из предшествующих заданий) модели использующие поля OneToOneField, ForeignKey, ManyToManyField.
+
+#Использовать graph_models из django-extensions что бы отобразить структуру моделей ТОЛЬКО этого приложения. Результат - изображение сопоставимое с представленным в ридми файле #репозитория https://github.com/KhvPaul/django_example_project
+
+#Учтите, что для работы этой команды необходимо доустановить зависимости в систему. Если у вас не получается - можете составить условную диаграмму связей между таблицами самостоятельно.
+
+#Пример:
+#Город
+#Клиент (MTM на товар, FK на город)
+#Товар
+#Поставщик (OTO на город)
+
+#Написать по запросу из инстанса одной модели в другую по каждой из связей (всего 3 запроса).
+#...
+#city = City.objects.get(id=1)
+#city."<model>_set".filter(date__year=2022).order_by("-date")
+#<SQL>
+#retailer = Retailer.objects.get(id=1)
+#retailer.city
+#<SQL>
+#...
+#Для создания запроса используйте shell_plus --print-sql что бы ваш SQL отобразился в консоли.
+
+#Ожидаю:
+
+#Ссылка на репозиторий
+#Прикрепленный скрин с диаграммой связей между таблицами (и/или наличие его в репозитории)
+#Запрос и его SQL версия (текст или скрин в комментарии и/или в репозитории)
