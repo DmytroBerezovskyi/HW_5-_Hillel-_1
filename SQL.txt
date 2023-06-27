@@ -1,0 +1,71 @@
+In [1]: city = City.objects.get(id=1)
+SELECT "catalog_city"."id",
+       "catalog_city"."name",
+       "catalog_city"."state"
+  FROM "catalog_city"
+ WHERE "catalog_city"."id" = 1
+ LIMIT 21
+
+Execution time: 0.000388s [Database: default]
+
+In [2]: city.client_set.filter(last_name__in=["Jones", "Le"])
+Out[2]: SELECT "catalog_client"."id",
+       "catalog_client"."first_name",
+       "catalog_client"."last_name",
+       "catalog_client"."city_id"
+  FROM "catalog_client"
+ WHERE ("catalog_client"."city_id" = 1 AND "catalog_client"."last_name" IN ('Jones', 'Le'))
+ LIMIT 21
+
+Execution time: 0.000166s [Database: default]
+<QuerySet [<Client: Kevin Jones>]>
+
+
+In [3]: supplier = Supplier.objects.get(title="Kit-kat")
+SELECT "catalog_supplier"."city_id",
+       "catalog_supplier"."title"
+  FROM "catalog_supplier"
+ WHERE "catalog_supplier"."title" = 'Kit-kat'
+ LIMIT 21
+
+Execution time: 0.000054s [Database: default]
+
+In [3]: supplier.city
+SELECT "catalog_city"."id",
+       "catalog_city"."name",
+       "catalog_city"."state"
+  FROM "catalog_city"
+ WHERE "catalog_city"."id" = 2
+ LIMIT 21
+
+Execution time: 0.000071s [Database: default]
+Out[22]: <City: Daniel, East Nicole>
+
+
+In [4]: Client.objects.filter(product__id=1)
+Out[4]: SELECT "catalog_client"."id",
+       "catalog_client"."first_name",
+       "catalog_client"."last_name",
+       "catalog_client"."city_id"
+  FROM "catalog_client"
+ INNER JOIN "catalog_client_product"
+    ON ("catalog_client"."id" = "catalog_client_product"."client_id")
+ WHERE "catalog_client_product"."product_id" = 1
+ LIMIT 21
+
+Execution time: 0.000172s [Database: default]
+<QuerySet [<Client: Kevin Jones>, <Client: Lisa Mills>]>
+
+In [5]: Product.objects.filter(client__id=1)
+Out[5]: SELECT "catalog_product"."id",
+       "catalog_product"."title",
+       "catalog_product"."exp_date",
+       "catalog_product"."vendor_code"
+  FROM "catalog_product"
+ INNER JOIN "catalog_client_product"
+    ON ("catalog_product"."id" = "catalog_client_product"."product_id")
+ WHERE "catalog_client_product"."client_id" = 1
+ LIMIT 21
+
+Execution time: 0.000142s [Database: default]
+<QuerySet [<Product: (Hector Bryan, &1UTf91LeJ)>, <Product: (Kimberly Luna, 5r936Uakv!)>]>
