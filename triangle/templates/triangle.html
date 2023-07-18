@@ -1,0 +1,12 @@
+<form action="/triangle/" method="POST">
+    {% csrf_token %}
+  <p>Enter the values of the two katet of the triangle:</p>
+      <label for="fside">First side katet of triangle:</label>
+      <input type="number" id="fside" name="fside" autofocus placeholder="Enter some number" required ><br><br>
+      <label for="sside">Second side katet of triangle:</label>
+      <input type="number" id="sside" name="sside" placeholder="Enter some number" required ><br><br>
+
+    <input type="submit" value="Count">
+
+    {% block content %}{% endblock %}
+</form>
