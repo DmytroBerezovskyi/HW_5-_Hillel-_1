@@ -1,0 +1,11 @@
+<form action="/triangle/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+
+      {% if gip %}
+    <h2>The hypotenuse of a triangle is =  {{ gip }}</h2>
+  {% endif %}
+
+</form>
+{% block content %}{% endblock %}
