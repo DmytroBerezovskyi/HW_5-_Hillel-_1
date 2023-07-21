@@ -1,0 +1,12 @@
+<a href="{% url "person:update-person" person.id %}">Update person</a>&nbsp&nbsp
+<a href="{% url "person:delete-person" person.id %}">Delete person</a>&nbsp&nbsp
+<a href="{% url "person:create-person" %}">Create new person</a>
+
+{% if message %} {{ message }} {% endif %}
+{% csrf_token %}
+<fieldset>
+    <p>{{ person.first_name }}</p>
+    <p>{{ person.last_name }}</p>
+    <p>{{ person.email }}</p>
+</fieldset>
+
