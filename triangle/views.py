@@ -1,11 +1,13 @@
+from django.utils import timezone
+from datetime import datetime
 from django.core.exceptions import ValidationError
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views import generic
 
 from .forms import Triangls
-from .forms import Person
-from .models import Person_model
-
+from .forms import PersonModelForm
+from .models import Person
 
 
 def triangle(request):
@@ -31,77 +33,72 @@ def triangle(request):
     return render(request, "form.html", {"form": form})
 
 
+class IndexView(generic.ListView):
+    template_name = "index.html"
+    context_object_name = "latest_person_list"
+    paginate_by = 5
 
-# class DetailView(generic.DetailView):
-#     model = Person_model
-#     template_name = 'detail.html'
-#
-#     def get_queryset(self):
-#         """
-#         Excludes any questions that aren't published yet.
-#         """
-#         return Person_model.objects.filter()
+    def get_queryset(self):
+        """
+        Return the last five published questions (not including those set to be
+        published in the future).
+        """
+        return Person.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:20]
 
 
-def person(request):
-    # if this is a POST request we need to process the form data
-    if request.method == "POST":
-        # create a form instance and populate it with data from the request:
-        form = Person(request.POST)
-        # check whether it's valid:
-        person_1 = get_object_or_404(Person_model, first_name_1="Oleg1")
-        if form.is_valid():
-                # process the data in form.cleaned_data as required
-                # ...
-                # redirect to a new URL:
-                # first_name_1 = get_object_or_404(Person_model, first_name_1=form.cleaned_data["first_name_1"])
-                # print(first_name_1)
-            return render(request, "detail.html", {"person_1": person_1})
+class PersonDetailView(generic.DetailView):
+    model = Person
+    template_name = "detail.html"
 
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        form = Person()
 
-    return render(request, "person_form.html", {"form": form})
+class PersonResultsView(generic.DetailView):
+    model = Person
+    template_name = "results.html"
 
-# def detail(request):
-#     first_name_1 = get_object_or_404(Person_model, id=1)
-#     return render(request, 'detail.html', {'first_name_1': first_name_1})
 
 def create_person(request):
     if request.method == "POST":
-        form = Person(request.POST)
+        form = PersonModelForm(request.POST)
+
         if form.is_valid():
-            if Person_model.objects.filter(first_name_1=form.cleaned_data.get("first_name_1")) and Person_model.objects.filter(last_name_1=form.cleaned_data.get("last_name_1")) and Person_model.objects.filter(email_1=form.cleaned_data.get("email_1")):
-                raise ValidationError("User already registered")
-            else:
-                person_1 = Person_model.objects.create(first_name_1=form.cleaned_data["first_name_1"], last_name_1=form.cleaned_data["last_name_1"], email_1=form.cleaned_data["email_1"])
-        return render(request, "create_person.html", {"form": form})
+            first_name = form.cleaned_data.get("first_name")
+            last_name = form.cleaned_data.get("last_name")
+            email = form.cleaned_data.get("email")
 
-    else:
-        form = Person()
-    # first_name_1 = get_object_or_404(Person_model, id=1)
-    # print(first_name_1)
-    return render(request, "create_person.html", {"form": form})
+            # In case if user already registered, will redirect to person:detail of user
+            if Person.objects.filter(first_name=first_name, last_name=last_name, email=email).exists():
+                person = get_object_or_404(Person, first_name=first_name, last_name=last_name, email=email)
+                return redirect(reverse("person:detail", args=(person.id,)))
 
-
-
-def update_person(request):
-    person = get_object_or_404(Person_model, first_name_1="Oleg")
-    if request.method == "POST":
-        form = Person(request.POST)
-        if form.is_valid():
-            person.first_name_1 = form.cleaned_data["first_name_1"]
+            person = form.save(commit=False)
+            person.pub_date = datetime.now()
             person.save()
-            #person_1 = Person_model.objects.update(first_name_1=form.cleaned_data["first_name_1"], last_name_1=form.cleaned_data["last_name_1"], email_1=form.cleaned_data["email_1"])
-        return render(request, "update_person.html", {"form": form})
-
+            return redirect(reverse("person:detail", args=(person.id,)))
     else:
-        form = Person(initial={"firs_name_1": person.first_name_1})
-    # first_name_1 = get_object_or_404(Person_model, id=1)
-    # print(first_name_1)
-    return render(request, "update_person.html", {"form": form})
+        form = PersonModelForm(initial={"pub_date": datetime.now()})
+    return render(request, "person_form.html", {"form": form})
 
-class QuestionDetailView(generic.DetailView):
-    model = Person_model
-    template_name = "detail.html"
+
+def update_person(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+    if request.method == "POST":
+        form = PersonModelForm(request.POST, instance=person)
+        if form.is_valid():
+            first_name = form.cleaned_data.get("first_name")
+            last_name = form.cleaned_data.get("last_name")
+            email = form.cleaned_data.get("email")
+            # In case if user have same detail, will be ValidationError
+            if Person.objects.filter(first_name=first_name, last_name=last_name, email=email).exists():
+                raise ValidationError("Person already have same datail")
+            form.save()
+            return redirect(reverse("person:detail", args=(person.id,)))
+    else:
+        form = PersonModelForm(instance=person)
+    return render(request, "person_form.html", {"form": form, "person": person})
+
+
+def delete_person(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+    person = Person.objects.get(id=pk)
+    person.delete()
+    return redirect("person:index")

@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-{{ first_name_1.as_p }}
-</body>
-</html>
+<a href="{% url "person:update-person" person.id %}">Update person</a>&nbsp&nbsp
+<a href="{% url "person:delete-person" person.id %}">Delete person</a>&nbsp&nbsp
+<a href="{% url "person:create-person" %}">Create new person</a>
 
-{{ person_1.as_p }}
+{% if message %} {{ message }} {% endif %}
+{% csrf_token %}
+<fieldset>
+    <p>{{ person.first_name }}</p>
+    <p>{{ person.last_name }}</p>
+    <p>{{ person.email }}</p>
+</fieldset>
 
-{{ person_model.first_name_1 }}
-
-{{ person_1.first_name_1 }}
-{{ person_1.last_name_1 }}
